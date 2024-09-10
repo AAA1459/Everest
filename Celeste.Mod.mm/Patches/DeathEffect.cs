@@ -23,7 +23,7 @@ namespace Celeste {
         /// <summary>
         /// a temporary texture used to the next DeathEffect.Draw get call
         /// </summary>
-        public static MTexture _texture;
+        private static MTexture _texture;
 
         [MonoModIgnore]
         [PatchDeathEffectUpdate]
