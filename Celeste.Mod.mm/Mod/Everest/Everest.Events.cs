@@ -310,6 +310,21 @@ namespace Celeste.Mod {
                 internal static void BeforeRender(_SubHudRenderer renderer, Scene scene)
                     => OnBeforeRender?.Invoke(renderer, scene);
             }
+
+            public static class PlayerSprite {
+                public delegate List<string> GetIdsUsedFillAnimForIdHandler(string id, List<string> ids);
+
+                /// <summary>
+                /// Called during <see cref="patch_PlayerSprite.CreateFramesMetadata(string)"/>, unless <see cref="DoNotFillAnimFor"/> contains its given string.
+                /// <br/> <br/>
+                /// Mods using this should always add an id to <see cref="List{T}"/> ids whether what the <see cref="string"/> id was given, to avoid certain <see cref="string"/> id missing their animations
+                /// </summary>
+                public static event GetIdsUsedFillAnimForIdHandler OnGetIdsUsedFillAnimFor;
+                internal static List<string> GetIdsUsedFillAnimFor(string id)
+                    => OnGetIdsUsedFillAnimFor?.Invoke(id, new());
+
+                public static HashSet<string> DoNotFillAnimFor = new(StringComparer.CurrentCultureIgnoreCase);
+            }
         }
     }
 }
