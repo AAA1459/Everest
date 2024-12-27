@@ -36,10 +36,6 @@ namespace Celeste {
                 }
             }
         }
-
-        private static bool doNotFillAnimContains(string id) {
-            return Everest.Events.PlayerSprite.DoNotFillAnimFor.Contains(id);
-        }
     }
 }
 
@@ -52,18 +48,17 @@ namespace MonoMod {
         public static void PatchPlayerSpriteCreateFramesMetadata(ILContext context, CustomAttribute attrib) {
             MethodReference m_PlayerSprite_fillAnimForID = context.Method.DeclaringType.FindMethod("fillAnimForID");
 
-            // FieldReference f_DoNotFillAnimFor = MonoModRule.Modder.Module.GetType("Celeste.Mod.Everest/Events/PlayerSprite").FindField("DoNotFillAnimFor");
+            FieldReference f_DoNotFillAnimFor = MonoModRule.Modder.Module.GetType("Celeste.Mod.Everest/Events/PlayerSprite").FindField("DoNotFillAnimFor");
 
-            // If anyone knows how to correctly reflect and call HashSet<T>.Contains, please replace this with it.
-            MethodReference m_PlayerSprite_doNotFillAnimContains = context.Method.DeclaringType.FindMethod("doNotFillAnimContains");
+            MethodReference m_PlayerSprite_doNotFillAnimContains = context.Import(typeof(HashSet<string>).GetMethod("Contains"));
 
             ILCursor cursor = new ILCursor(context);
 
-            // If anyone knows how to correctly reflect and call HashSet<T>.Contains, please replace here with DoNotFillAnimFor.Contains(id).
             // if (ifDoNotFillAnimContains(id)) {
             ILLabel If = cursor.DefineLabel();
             ILLabel done = cursor.DefineLabel();
 
+            cursor.EmitLdsfld(f_DoNotFillAnimFor);
             cursor.EmitLdarg0();
             cursor.EmitCall(m_PlayerSprite_doNotFillAnimContains);
             cursor.EmitBrtrue(If);
