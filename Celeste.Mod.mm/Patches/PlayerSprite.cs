@@ -54,7 +54,7 @@ namespace MonoMod {
 
             ILCursor cursor = new ILCursor(context);
 
-            // if (ifDoNotFillAnimContains(id)) {
+            // if (!Everest.Events.PlayerSprite.DoNotFillAnimFor.Contains(id)) {
             ILLabel If = cursor.DefineLabel();
             ILLabel done = cursor.DefineLabel();
 
