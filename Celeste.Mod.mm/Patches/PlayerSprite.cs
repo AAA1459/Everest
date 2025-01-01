@@ -1,4 +1,5 @@
-﻿using Celeste.Mod;
+using Celeste;
+using Celeste.Mod;
 using Microsoft.Xna.Framework;
 using Mono.Cecil;
 using Monocle;
@@ -21,6 +22,10 @@ namespace Celeste {
         [PatchPlayerSpriteCreateFramesMetadata]
         public static void CreateFramesMetadata(string id) {
         }
+      
+        [MonoModIgnore]
+        [ForceNoInlining]
+        public new extern static void ClearFramesMetadata();
 #pragma warning restore CS0108
 
         private static void fillAnimForID(string id) {
