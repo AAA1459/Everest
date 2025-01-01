@@ -1,4 +1,4 @@
-﻿using Celeste.Mod.UI;
+﻿﻿using Celeste.Mod.UI;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -320,17 +320,33 @@ namespace Celeste.Mod {
             }
 
             public static class PlayerSprite {
-                public delegate List<string> GetIdsUsedFillAnimForIdHandler(string id, List<string> ids);
+                public delegate void GetIdsUsedFillAnimForIdHandler(List<string> ids, string id);
 
                 /// <summary>
                 /// Called during <see cref="patch_PlayerSprite.CreateFramesMetadata(string)"/>, unless <see cref="DoNotFillAnimFor"/> contains its given string.
                 /// <br/> <br/>
                 /// Mods using this should always add an id to <see cref="List{T}"/> ids whether what the <see cref="string"/> id was given, to avoid certain <see cref="string"/> id missing their animations
-                /// </summary>
-                public static event GetIdsUsedFillAnimForIdHandler OnGetIdsUsedFillAnimFor;
-                internal static List<string> GetIdsUsedFillAnimFor(string id)
-                    => OnGetIdsUsedFillAnimFor?.Invoke(id, new());
+                /// <br/>e.g: <code>
+                /// Everest.Event.PlayerSprite.OnGetIdsUsedFillAnimForId += ((ids, id) => {
+                ///     if (id == "player_no_backpack")
+                ///        ids.Add("MyHelper_Anims_NB")
+                ///     else
+                ///        ids.Add("MyHelper_Anims")
+                /// });
+                /// </code></summary>
+                public static event GetIdsUsedFillAnimForIdHandler OnGetIdsUsedFillAnimForId;
 
+                internal static List<string> GetIdsUsedFillAnimFor(string id) {
+                    List<string> ids = new();
+                    OnGetIdsUsedFillAnimForId?.Invoke(new(), id);
+                    return ids;
+                }
+
+                // Put this field here make it so visible
+                /// <summary>
+                /// Used to prevent the somethings to be fill with animations of itself and more because...<br/>
+                /// ...mods using <see cref="OnGetIdsUsedFillAnimForId"/> should always add an id to the <see cref="List{T}"/> of it, 
+                /// </summary>
                 public static HashSet<string> DoNotFillAnimFor = new(StringComparer.CurrentCultureIgnoreCase);
             }
         }

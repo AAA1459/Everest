@@ -1,4 +1,4 @@
-using Celeste;
+﻿using Celeste;
 using Celeste.Mod;
 using Microsoft.Xna.Framework;
 using Mono.Cecil;
@@ -22,7 +22,7 @@ namespace Celeste {
         [PatchPlayerSpriteCreateFramesMetadata]
         public static void CreateFramesMetadata(string id) {
         }
-      
+
         [MonoModIgnore]
         [ForceNoInlining]
         public new extern static void ClearFramesMetadata();
@@ -30,7 +30,7 @@ namespace Celeste {
 
         private static void fillAnimForID(string id) {
             List<string> ids = Everest.Events.PlayerSprite.GetIdsUsedFillAnimFor(id);
-            if (ids == null)
+            if (ids.Count == 0)
                 return;
             Dictionary<string, patch_Sprite.Animation> existingAnim = (GFX.SpriteBank.SpriteData[id].Sprite as patch_Sprite).Animations;
             foreach (string id2 in ids) {
@@ -63,7 +63,6 @@ namespace MonoMod {
                 HasThis = m_temp.HasThis,
                 ExplicitThis = m_temp.ExplicitThis,
                 CallingConvention = m_temp.CallingConvention,
-
             });
             m_HashSet_string_Contains.Parameters.AddRange(m_temp.Parameters);
 
