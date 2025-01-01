@@ -36,10 +36,6 @@ namespace Celeste {
                 }
             }
         }
-
-        private static bool doNotFillAnimContains(string id) {
-            return Everest.Events.PlayerSprite.DoNotFillAnimFor.Contains(id);
-        }
     }
 }
 
@@ -52,29 +48,35 @@ namespace MonoMod {
         public static void PatchPlayerSpriteCreateFramesMetadata(ILContext context, CustomAttribute attrib) {
             MethodReference m_PlayerSprite_fillAnimForID = context.Method.DeclaringType.FindMethod("fillAnimForID");
 
-            // FieldReference f_DoNotFillAnimFor = MonoModRule.Modder.Module.GetType("Celeste.Mod.Everest/Events/PlayerSprite").FindField("DoNotFillAnimFor");
+            FieldReference f_DoNotFillAnimFor = MonoModRule.Modder.Module.GetType("Celeste.Mod.Everest/Events/PlayerSprite").FindField("DoNotFillAnimFor");
 
-            // If anyone knows how to correctly reflect and call HashSet<T>.Contains, please replace this with it.
-            MethodReference m_PlayerSprite_doNotFillAnimContains = context.Method.DeclaringType.FindMethod("doNotFillAnimContains");
+            //Explicitly instantiate the generic HashSet<T> type
+            GenericInstanceType genericInst = (GenericInstanceType) context.Module.ImportReference(f_DoNotFillAnimFor.FieldType);
+
+            MethodReference m_temp = context.Module.ImportReference(genericInst.Resolve().FindMethod("Contains"));
+            MethodReference m_HashSet_string_Contains = context.Module.ImportReference(new MethodReference(m_temp.Name, m_temp.ReturnType, genericInst) {
+                HasThis = m_temp.HasThis,
+                ExplicitThis = m_temp.ExplicitThis,
+                CallingConvention = m_temp.CallingConvention,
+
+            });
+            m_HashSet_string_Contains.Parameters.AddRange(m_temp.Parameters);
 
             ILCursor cursor = new ILCursor(context);
 
-            // If anyone knows how to correctly reflect and call HashSet<T>.Contains, please replace here with DoNotFillAnimFor.Contains(id).
-            // if (ifDoNotFillAnimContains(id)) {
+            // if (DoNotFillAnimFor.Contains(id)) {
             ILLabel If = cursor.DefineLabel();
-            ILLabel done = cursor.DefineLabel();
-
+            cursor.EmitLdsfld(f_DoNotFillAnimFor);
             cursor.EmitLdarg0();
-            cursor.EmitCall(m_PlayerSprite_doNotFillAnimContains);
+            cursor.EmitCallvirt(m_HashSet_string_Contains);
             cursor.EmitBrtrue(If);
 
             //   fillAnimForID(id);
             cursor.EmitLdarg0();
             cursor.EmitCall(m_PlayerSprite_fillAnimForID);
             // }
-            cursor.EmitBr(done);
+            cursor.EmitBr(If);
             cursor.MarkLabel(If);
-            cursor.MarkLabel(done);
         }
     }
 }
