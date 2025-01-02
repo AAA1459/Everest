@@ -344,8 +344,8 @@ namespace Celeste.Mod {
 
                 // Put this field here make it so visible
                 /// <summary>
-                /// Used to prevent the somethings to be fill with animations of itself and more because...<br/>
-                /// ...mods using <see cref="OnGetIdsUsedFillAnimForId"/> should always add an id to the <see cref="List{T}"/> of it, 
+                /// Filter IDs that should not be fill anim by other IDs during <see cref="patch_PlayerSprite.CreateFramesMetadata(string)"/>,
+                /// <br/>prevent e.g "MyHelper_Anims", ""MyHelper_Anims_NB", "OthersHelper_Anims" ids from senseless filling each other's animations
                 /// </summary>
                 public static HashSet<string> DoNotFillAnimFor = new(StringComparer.CurrentCultureIgnoreCase);
             }
