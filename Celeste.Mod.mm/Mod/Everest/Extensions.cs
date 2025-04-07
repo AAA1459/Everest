@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Ionic.Zip;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using Monocle;
@@ -23,6 +24,13 @@ namespace Celeste.Mod {
         public static MemoryStream ExtractStream(this ZipArchiveEntry entry) {
             MemoryStream ms = new MemoryStream();
             using (Stream input = entry.Open()) input.CopyTo(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms;
+        }
+
+        public static MemoryStream ExtractStream(this ZipEntry entry) {
+            MemoryStream ms = new MemoryStream();
+            entry.Extract(ms);
             ms.Seek(0, SeekOrigin.Begin);
             return ms;
         }
