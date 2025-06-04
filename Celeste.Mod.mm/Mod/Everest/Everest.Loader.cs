@@ -208,6 +208,7 @@ namespace Celeste.Mod {
 
                 watch.Stop();
                 Logger.Verbose("loader", $"ALL MODS LOADED IN {watch.ElapsedMilliseconds}ms");
+                Logger.Info("loader", $"Loaded {Everest._Modules.Count} modules");
 
                 try {
                     Watcher = new FileSystemWatcher {
