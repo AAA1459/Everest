@@ -1,4 +1,5 @@
-﻿using Celeste.Mod.Backdrops;
+
+using Celeste.Mod.Backdrops;
 using Celeste.Mod.Core;
 using Celeste.Mod.Entities;
 using Celeste.Mod.Helpers;
