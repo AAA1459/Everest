@@ -69,12 +69,15 @@ namespace Celeste {
                 Logger.Debug("Autotiler", $"Reading template for tileset with id '{data.ID}', scan height {data.ScanHeight}, and scan width {data.ScanWidth}.");
                 ReadIntoCustomTemplate(data, tileset, xml);
             }
-
-            if (xml.HasAttr("soundPath") && xml.HasAttr("sound")) { // Could accommodate for no sound attr, but requiring it should improve clarity on user's end
+            
+            if (xml.HasAttr("sound")) {
                 SurfaceIndex.TileToIndex[xml.AttrChar("id")] = xml.AttrInt("sound");
-                patch_SurfaceIndex.IndexToCustomPath[xml.AttrInt("sound")] = (xml.Attr("soundPath").StartsWith("event:/") ? "" : "event:/") + xml.Attr("soundPath");
-            } else if (xml.HasAttr("sound")) {
-                SurfaceIndex.TileToIndex[xml.AttrChar("id")] = xml.AttrInt("sound");
+                if (xml.HasAttr("soundPath")) {
+                    patch_SurfaceIndex.IndexToCustomPath[xml.AttrInt("sound")] = (xml.Attr("soundPath").StartsWith("event:/") ? "" : "event:/") + xml.Attr("soundPath");
+                }
+                if (xml.HasAttr("soundParam")) {
+                    patch_SurfaceIndex.IndexToSoundParam[xml.AttrInt("sound")] = xml.AttrInt("soundParam");
+                }
             } else if (!SurfaceIndex.TileToIndex.ContainsKey(xml.AttrChar("id"))) {
                 SurfaceIndex.TileToIndex[xml.AttrChar("id")] = 0; // fall back to no sound
             }
@@ -267,7 +270,8 @@ namespace Celeste {
             }
 
             bool fillTile = true;
-            char[] adjacent = new char[width * height];
+            Span<char> adjacent = stackalloc char[width * height];
+            Span<bool> adjacentPresent = stackalloc bool[width * height]; // Whether a tile is present (not air and not ignored).
 
             int idx = 0;
             for (int yOffset = 0; yOffset < height; yOffset++) {
@@ -277,6 +281,7 @@ namespace Celeste {
                     if (!tilePresent && behaviour.EdgesIgnoreOutOfLevel && !CheckForSameLevel(x, y, x + xOffset, y + yOffset)) {
                         tilePresent = true;
                     }
+                    adjacentPresent[idx] = tilePresent;
                     adjacent[idx++] = adjTile;
                     if (!tilePresent)
                         fillTile = false;
@@ -302,12 +307,12 @@ namespace Celeste {
                     if (item.Mask[i] == 2) // Matches Any
                         continue;
 
-                    if (item.Mask[i] == 1 && IsEmpty(adjacent[i])) {
+                    if (item.Mask[i] == 1 && !adjacentPresent[i]) {
                         matched = false;
                         break;
                     }
 
-                    if (item.Mask[i] == 0 && !IsEmpty(adjacent[i])) {
+                    if (item.Mask[i] == 0 && adjacentPresent[i]) {
                         matched = false;
                         break;
                     }
